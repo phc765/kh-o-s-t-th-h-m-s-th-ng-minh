@@ -8,10 +8,18 @@ import { GoogleGenAI } from "@google/genai";
 // --- Configuration & State ---
 
 const API_KEY = process.env.API_KEY;
-if (!API_KEY) {
-    throw new Error("API_KEY environment variable not set");
+let ai: GoogleGenAI | null = null;
+
+if (API_KEY) {
+    try {
+        ai = new GoogleGenAI({ apiKey: API_KEY });
+    } catch (e) {
+        console.error("Failed to initialize GoogleGenAI", e);
+    }
+} else {
+    console.warn("API_KEY environment variable not set. AI-powered hints will be disabled.");
 }
-const ai = new GoogleGenAI({ apiKey: API_KEY });
+
 
 interface AppState {
     a: number;
@@ -308,27 +316,32 @@ const checkGameAnswer = async () => {
         // Draw the correct line on top
         drawFunction(gameCtx, gameCanvas, state.game.secretA, state.game.secretB);
     } else {
-        gameFeedback.textContent = 'Sai rồi. Đang nhờ AI trợ giúp...';
-        gameFeedback.className = 'feedback loading';
-        
-        try {
-            const prompt = `Một học sinh lớp 8 đang chơi game đoán hàm số bậc nhất y=ax+b.
-            Hàm số đúng là y=${state.game.secretA}x + ${state.game.secretB}.
-            Học sinh đoán là y=${guessA}x + ${guessB}.
-            Các điểm cho trước trên đồ thị là (${state.game.points[0].x}, ${state.game.points[0].y}) và (${state.game.points[1].x}, ${state.game.points[1].y}).
-            Hãy đưa ra một gợi ý ngắn gọn, thân thiện bằng tiếng Việt để giúp học sinh tìm ra đáp án đúng. Bắt đầu bằng "Gợi ý:". Ví dụ: "Gợi ý: Hãy thử tính hệ số góc 'a' từ hai điểm đã cho nhé!" hoặc "Gợi ý: Hãy xem đường thẳng cắt trục tung tại điểm nào để tìm 'b'."`;
+        if (ai) {
+            gameFeedback.textContent = 'Sai rồi. Đang nhờ AI trợ giúp...';
+            gameFeedback.className = 'feedback loading';
+            
+            try {
+                const prompt = `Một học sinh lớp 8 đang chơi game đoán hàm số bậc nhất y=ax+b.
+                Hàm số đúng là y=${state.game.secretA}x + ${state.game.secretB}.
+                Học sinh đoán là y=${guessA}x + ${guessB}.
+                Các điểm cho trước trên đồ thị là (${state.game.points[0].x}, ${state.game.points[0].y}) và (${state.game.points[1].x}, ${state.game.points[1].y}).
+                Hãy đưa ra một gợi ý ngắn gọn, thân thiện bằng tiếng Việt để giúp học sinh tìm ra đáp án đúng. Bắt đầu bằng "Gợi ý:". Ví dụ: "Gợi ý: Hãy thử tính hệ số góc 'a' từ hai điểm đã cho nhé!" hoặc "Gợi ý: Hãy xem đường thẳng cắt trục tung tại điểm nào để tìm 'b'."`;
 
-            const response = await ai.models.generateContent({
-                model: 'gemini-2.5-flash',
-                contents: prompt,
-            });
+                const response = await ai.models.generateContent({
+                    model: 'gemini-2.5-flash',
+                    contents: prompt,
+                });
 
-            gameFeedback.textContent = response.text;
-            gameFeedback.className = 'feedback incorrect';
-        } catch (error) {
-            console.error(error);
-            gameFeedback.textContent = "Gợi ý: Hãy kiểm tra lại cách tính hệ số góc 'a' và điểm cắt trục tung 'b'.";
-            gameFeedback.className = 'feedback incorrect';
+                gameFeedback.textContent = response.text;
+                gameFeedback.className = 'feedback incorrect';
+            } catch (error) {
+                console.error(error);
+                gameFeedback.textContent = "Gợi ý: Hãy kiểm tra lại cách tính hệ số góc 'a' và điểm cắt trục tung 'b'.";
+                gameFeedback.className = 'feedback incorrect';
+            }
+        } else {
+             gameFeedback.textContent = "Gợi ý: Hãy kiểm tra lại cách tính hệ số góc 'a' và điểm cắt trục tung 'b'.";
+             gameFeedback.className = 'feedback incorrect';
         }
     }
 };
