@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GraphMath 8 – Khám phá đồ thị hàm số bậc nhất</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://esm.sh/@google/genai@^1.15.0"
+  }
+}
+</script>
+</head>
+<body>
+    <div id="app-container">
+        <header>
+            <h1>Khám phá đồ thị hàm số bậc nhất – Toán 8</h1>
+            <p>y = ax + b</p>
+        </header>
+        <nav>
+            <button id="tab-experiment" class="tab-button active">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+                <span>Thí nghiệm</span>
+            </button>
+            <button id="tab-game" class="tab-button">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 13.5A2.5 2.5 0 0 1 0 11V3a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2.5 2.5 0 0 1-2.5 2.5zM10.5 0H13.5A2.5 2.5 0 0 1 16 2.5V10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2.5 2.5 0 0 1 2.5-2.5z"></path><path d="M11 11.5a2.5 2.5 0 0 1 2.5-2.5H21a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-8a2.5 2.5 0 0 1-2.5-2.5zM13 24a2.5 2.5 0 0 1-2.5-2.5V14a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2.5 2.5 0 0 1-2.5 2.5z"></path></svg>
+                <span>Mini-game</span>
+            </button>
+            <button id="tab-quiz" class="tab-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 2H8.6c-.4 0-.8.2-1.1.5-.3.3-.5.7-.5 1.1V21c0 .4.2.8.5 1.1.3.3.7.5 1.1.5h7.8c.4 0 .8-.2 1.1-.5.3-.3.5-.7.5-1.1V6.5L15.5 2z"></path><path d="M15 2v5h5"></path><path d="M10 16l2 2 4-4"></path><path d="M10 11h6"></path></svg>
+                <span>Trắc nghiệm</span>
+            </button>
+        </nav>
+        <main id="root">
+            <!-- App content will be rendered here by index.tsx -->
+            <section id="experiment-section" class="content-section active">
+                <div class="controls">
+                    <div class="slider-container">
+                        <label for="slider-a">Hệ số a: <span id="a-value">1</span></label>
+                        <input type="range" id="slider-a" min="-5" max="5" value="1" step="0.1">
+                    </div>
+                    <div class="slider-container">
+                        <label for="slider-b">Hệ số b: <span id="b-value">0</span></label>
+                        <input type="range" id="slider-b" min="-5" max="5" value="0" step="0.1">
+                    </div>
+                </div>
+                <div class="graph-container">
+                    <canvas id="graph-canvas" width="400" height="400"></canvas>
+                    <p id="hint-text" class="hint"></p>
+                </div>
+            </section>
+            <section id="game-section" class="content-section">
+                <div class="game-area">
+                    <div class="graph-container">
+                         <canvas id="game-canvas" width="400" height="400"></canvas>
+                    </div>
+                    <div class="game-controls">
+                        <p>Dựa vào đồ thị, hãy đoán giá trị của <strong>a</strong> và <strong>b</strong>.</p>
+                        <div class="input-group">
+                            <label for="guess-a">a =</label>
+                            <input type="number" id="guess-a" placeholder="Đoán a">
+                        </div>
+                        <div class="input-group">
+                            <label for="guess-b">b =</label>
+                            <input type="number" id="guess-b" placeholder="Đoán b">
+                        </div>
+                        <div class="button-group">
+                            <button id="check-answer-btn">Kiểm tra</button>
+                            <button id="new-game-btn">Trò chơi mới</button>
+                        </div>
+                         <div id="game-feedback" class="feedback"></div>
+                         <div id="game-score">Điểm: 0</div>
+                    </div>
+                </div>
+            </section>
+            <section id="quiz-section" class="content-section">
+                <div class="quiz-container">
+                    <div id="quiz-question-container">
+                        <h3 id="quiz-question"></h3>
+                        <div id="quiz-options" class="quiz-options"></div>
+                    </div>
+                    <div id="quiz-feedback" class="feedback"></div>
+                    <button id="next-question-btn">Câu tiếp theo</button>
+                    <div id="quiz-score">Điểm: 0</div>
+                </div>
+            </section>
+        </main>
+        <footer>
+            <p>Thiết kế bởi: Lê Thị Hà – Giáo viên Toán</p>
+            <p>Đơn vị: Trường TH – THCS Chiềng Chăn, tỉnh Hòa Bình</p>
+        </footer>
+    </div>
+    <script type="module" src="index.tsx"></script>
+</body>
+</html>
